@@ -1,4 +1,4 @@
-Reproducible Research 1
+Reproducible Research 2
 =======================
 
-Repo for Coursera reproducible research project #1
+Repo for Coursera reproducible research project #2
