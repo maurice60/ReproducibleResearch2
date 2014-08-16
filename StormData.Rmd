@@ -10,4 +10,22 @@ output: html_document
 ```{r load-data, cache=TRUE}
 storm <- read.csv(bzfile('StormData.csv.bz2'))
 ```
+```{r by-type, cache=TRUE}
+library(sqldf)
+byType <- sqldf('select EVTYPE, sum(FATALITIES) fatalities, sum(INJURIES) injuries, sum(FATALITIES+INJURIES) casualties,
+                sum(PROPDMG) property, sum(CROPDMG) crops, sum(PROPDMG+CROPDMG) damage
+                from storm
+                group by EVTYPE order by EVTYPE')
+
+cas <- sqldf('select EVTYPE, fatalities, injuries, casualties
+                from byType
+                where casualties > 0
+                order by casualties desc')
+```
 ##Results  
+```{r}
+head(cas, 10)
+par(mai=c(1,2,0,1))
+barplot(as.matrix(rbind(cas$fatalities[2:10], cas$injuries[2:10])), horiz=TRUE, names.arg=cas$EVTYPE[2:10], las=1)
+```
+
