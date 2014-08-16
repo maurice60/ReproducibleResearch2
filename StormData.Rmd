@@ -1,0 +1,13 @@
+---
+title: "Analysis Of Damage Caused By Severe Weather Events"
+author: "M Williams"
+date: "16 August 2014"
+output: html_document
+---
+##Synopsis  
+
+##Data Processing  
+```{r load-data, cache=TRUE}
+storm <- read.csv(bzfile('StormData.csv.bz2'))
+```
+##Results  

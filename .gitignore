@@ -3,3 +3,11 @@
 .RData
 ReproducibleResearch2.Rproj
 StormData.csv.bz2
+
+StormData_cache/html/__packages
+
+*.RData
+
+StormData_cache/html/load-data_35b1215c9c49e2b880ab4d1d5b9139d1.rdb
+
+StormData_cache/html/load-data_35b1215c9c49e2b880ab4d1d5b9139d1.rdx
