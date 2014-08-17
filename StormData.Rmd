@@ -6,26 +6,72 @@ output: html_document
 ---
 ##Synopsis  
 
-##Data Processing  
+##Data Processing
+```{r load-library}
+library(sqldf)
+library(ggplot2)
+```
 ```{r load-data, cache=TRUE}
 storm <- read.csv(bzfile('StormData.csv.bz2'))
 ```
 ```{r by-type, cache=TRUE}
-library(sqldf)
 byType <- sqldf('select EVTYPE, sum(FATALITIES) fatalities, sum(INJURIES) injuries, sum(FATALITIES+INJURIES) casualties,
                 sum(PROPDMG) property, sum(CROPDMG) crops, sum(PROPDMG+CROPDMG) damage
                 from storm
                 group by EVTYPE order by EVTYPE')
-
+```
+```{r}
 cas <- sqldf('select EVTYPE, fatalities, injuries, casualties
                 from byType
                 where casualties > 0
                 order by casualties desc')
+
+topType <- cas[1:10,]
+
+casPlt <- sqldf('select EVTYPE evtype, casualties, "Total" rtype
+      from topType')
+
+casPlt <- rbind(casPlt, sqldf('select EVTYPE evtype, fatalities casualties, "Fatality" rtype
+      from topType'))
+
+casPlt <- rbind(casPlt, sqldf('select EVTYPE evtype, injuries casualties, "Injury" rtype
+      from topType'))
+
+```
+```{r}
+eco <- sqldf('select EVTYPE, property, crops, damage
+                from byType
+                where damage > 0
+             order by damage desc')
+
+topTypeEco <- eco[1:10,]
+
+ecoPlt <- sqldf('select EVTYPE evtype, damage, "Total" rtype
+      from topTypeEco')
+
+ecoPlt <- rbind(ecoPlt, sqldf('select EVTYPE evtype, property damage, "Property Damage" rtype
+      from topTypeEco'))
+
+ecoPlt <- rbind(ecoPlt, sqldf('select EVTYPE evtype, crops damage, "Crop Damage" rtype
+      from topTypeEco'))
 ```
 ##Results  
 ```{r}
-head(cas, 10)
-par(mai=c(1,2,0,1))
-barplot(as.matrix(rbind(cas$fatalities[2:10], cas$injuries[2:10])), horiz=TRUE, names.arg=cas$EVTYPE[2:10], las=1)
-```
+topType
 
+ggplot(data=casPlt, aes(x=evtype, y=casualties, fill=factor(rtype))) + 
+    ggtitle('Human Cost Of Storm Damage') +
+    geom_bar(position="dodge", stat="identity") + coord_flip() +
+    scale_x_discrete(limits=rev(topType$EVTYPE)) +
+    theme(legend.title=element_blank(), legend.position=c(.75,.7))
+
+```
+```{r}
+topTypeEco
+
+ggplot(data=ecoPlt, aes(x=evtype, y=damage, fill=factor(rtype))) + 
+    ggtitle('Economic Cost Of Storm Damage') +
+    geom_bar(position="dodge", stat="identity") + coord_flip() +
+    scale_x_discrete(limits=rev(topTypeEco$EVTYPE)) +
+    theme(legend.title=element_blank(), legend.position=c(.75,.7))
+```

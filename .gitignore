@@ -15,3 +15,7 @@ StormData_cache/html/load-data_35b1215c9c49e2b880ab4d1d5b9139d1.rdx
 StormData_cache/html/by-type_eda18b631f643a626ae2d95df1806bd6.rdb
 
 StormData_cache/html/by-type_eda18b631f643a626ae2d95df1806bd6.rdx
+
+*.rdb
+
+*.rdx
