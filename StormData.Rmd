@@ -5,21 +5,32 @@ date: "16 August 2014"
 output: html_document
 ---
 ##Synopsis  
+Analysis of the damage caused by storms in the United States during the years 1950 to 2011. The analysis is done both in terms of material damage and caualties caused. The material damage consists of damage to property and to crops. Casualties are both fatalities and injuries. In both cases the top ten in terms of total are reported, along with a breakdown of their constituents.  
 
 ##Data Processing
-```{r load-library}
+Load required libraries  
+
+```{r load-library, message=FALSE}
 library(sqldf)
 library(ggplot2)
+library(tcltk)
 ```
+
+Load data into a data frame  
+
 ```{r load-data, cache=TRUE}
 storm <- read.csv(bzfile('StormData.csv.bz2'))
-```
+```  
+Use sqldf to create summaries of the data by event type.  
+
 ```{r by-type, cache=TRUE}
 byType <- sqldf('select EVTYPE, sum(FATALITIES) fatalities, sum(INJURIES) injuries, sum(FATALITIES+INJURIES) casualties,
                 sum(PROPDMG) property, sum(CROPDMG) crops, sum(PROPDMG+CROPDMG) damage
                 from storm
                 group by EVTYPE order by EVTYPE')
-```
+```  
+Select top ten human casualty data and create a data frame for the plot  
+
 ```{r}
 cas <- sqldf('select EVTYPE, fatalities, injuries, casualties
                 from byType
@@ -37,7 +48,9 @@ casPlt <- rbind(casPlt, sqldf('select EVTYPE evtype, fatalities casualties, "Fat
 casPlt <- rbind(casPlt, sqldf('select EVTYPE evtype, injuries casualties, "Injury" rtype
       from topType'))
 
-```
+```  
+Select top ten property damage data and create a data frame for the plot  
+
 ```{r}
 eco <- sqldf('select EVTYPE, property, crops, damage
                 from byType
@@ -56,22 +69,31 @@ ecoPlt <- rbind(ecoPlt, sqldf('select EVTYPE evtype, crops damage, "Crop Damage"
       from topTypeEco'))
 ```
 ##Results  
+###Human Damage
+The events which are most harmful to population health are:  
+
 ```{r}
 topType
 
 ggplot(data=casPlt, aes(x=evtype, y=casualties, fill=factor(rtype))) + 
     ggtitle('Human Cost Of Storm Damage') +
     geom_bar(position="dodge", stat="identity") + coord_flip() +
-    scale_x_discrete(limits=rev(topType$EVTYPE)) +
+    scale_x_discrete(limits=rev(topType$EVTYPE), name="Event") +
+    scale_y_continuous(name="Casualties") + 
     theme(legend.title=element_blank(), legend.position=c(.75,.7))
 
-```
+```  
+  
+###Economic Damage
+The events which cause the most economic damage are:  
+
 ```{r}
 topTypeEco
 
 ggplot(data=ecoPlt, aes(x=evtype, y=damage, fill=factor(rtype))) + 
     ggtitle('Economic Cost Of Storm Damage') +
     geom_bar(position="dodge", stat="identity") + coord_flip() +
-    scale_x_discrete(limits=rev(topTypeEco$EVTYPE)) +
+    scale_x_discrete(limits=rev(topTypeEco$EVTYPE), name="Event") +
+    scale_y_continuous(name="Cost") +
     theme(legend.title=element_blank(), legend.position=c(.75,.7))
 ```
